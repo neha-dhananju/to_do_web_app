@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ list_name }}</title>
+</head>
+<body>
+    <h2>{{ list_name }}</h2>
+
+    <ul>
+        {% for task in tasks %}
+            <li>
+                {{ task[1] }}
+                <a href="{{ url_for('delete_task', list_id=list_id, task_id=task[0]) }}" style="color:red;">[Delete]</a>
+            </li>
+        {% else %}
+            <li>No tasks in this list yet.</li>
+        {% endfor %}
+    </ul>
+
+    <form method="POST">
+        <input type="text" name="task" placeholder="Add a task" required>
+        <button type="submit">Add</button>
+    </form>
+
+    <p><a href="{{ url_for('home') }}">⬅ Back to Home</a></p>
+</body>
+</html>

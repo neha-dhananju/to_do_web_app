@@ -1,31 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>To-Do App</title>
+    <title>My To-Do Files</title>
     <style>
-        body { font-family: Arial; max-width: 600px; margin: auto; padding: 2rem; }
-        ul { list-style-type: none; padding: 0; }
-        li { margin-bottom: 10px; }
-        form { margin-top: 20px; }
+        body { font-family: Arial, sans-serif; padding: 2rem; }
+        .grid { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .card {
+            width: 150px;
+            height: 100px;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: #f9f9f9;
+            border-radius: 10px;
+            text-decoration: none;
+            color: black;
+            box-shadow: 2px 2px 5px #aaa;
+        }
+        .add-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 32px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <h1>📝 My To-Do List</h1>
+    <h2>🗂 Your Task Files</h2>
 
-    <ul>
-        {% for task in tasks %}
-        <li>
-            {{ task[1] }}
-            <a href="{{ url_for('delete', task_id=task[0]) }}" style="color:red; margin-left: 10px;">[Delete]</a>
-        </li>
-        {% else %}
-        <li>No tasks yet.</li>
-        {% endfor %}
-    </ul>
-
-    <form method="POST">
-        <input type="text" name="task" placeholder="Enter new task" required>
-        <button type="submit">Add Task</button>
+    <form action="/create_list" method="POST" style="margin-bottom: 20px;">
+    <input type="text" name="list_title" placeholder="Enter list title..." required style="padding: 8px;">
+    <button class="add-btn" title="Create New Task List">+</button>
     </form>
+
+    <div class="grid">
+        {% for lst in lists %}
+            <a class="card" href="{{ url_for('task_list', list_id=lst[0]) }}">
+                {{ lst[1] }}
+            </a>
+        {% endfor %}
+    </div>
 </body>
 </html>
