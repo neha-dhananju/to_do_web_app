@@ -1,37 +1,42 @@
 from flask import Flask, render_template, request, redirect, url_for
-import os
+import sqlite3
 
 app = Flask(__name__)
-FILENAME = 'tasks.txt'  # same as your console app
+DB_NAME = 'todo.db'
 
+# Create DB table if it doesn't exist
+def init_db():
+    with sqlite3.connect(DB_NAME) as conn:
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                content TEXT NOT NULL
+            )
+        ''')
+
+# Home route – show tasks and form
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        task = request.form.get('task')
-        if task:
-            with open(FILENAME, 'a') as file:
-                file.write(task + '\n')
+        task_content = request.form.get('task')
+        if task_content:
+            with sqlite3.connect(DB_NAME) as conn:
+                conn.execute('INSERT INTO tasks (content) VALUES (?)', (task_content,))
         return redirect(url_for('index'))
-    else:
-        tasks = []
-        if os.path.exists(FILENAME):
-            with open(FILENAME, 'r') as file:
-                tasks = [line.strip() for line in file.readlines()]
-        return render_template('index.html', tasks=tasks)
 
-@app.route('/complete', methods=['POST'])
-def complete():
-    completed = request.form.getlist('done')
-    if completed:
-        with open(FILENAME, 'r') as file:
-            tasks = file.readlines()
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.execute('SELECT id, content FROM tasks')
+        tasks = cursor.fetchall()
+    return render_template('index.html', tasks=tasks)
 
-        remaining = [task for i, task in enumerate(tasks) if str(i) not in completed]
-
-        with open(FILENAME, 'w') as file:
-            for task in remaining:
-                file.write(task)
+# Delete route
+@app.route('/delete/<int:task_id>')
+def delete(task_id):
+    with sqlite3.connect(DB_NAME) as conn:
+        conn.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
     return redirect(url_for('index'))
 
+# Initialize DB when starting the app
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True)
